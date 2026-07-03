@@ -36,6 +36,9 @@ select:hover,select:focus{border-color:var(--indigo);}
 .btn{background:var(--indigo);border:none;color:#fff;border-radius:var(--r-sm);padding:5px 14px;font-size:11px;cursor:pointer;font-weight:600;}
 .btn:hover{opacity:0.9;}
 .badge{background:var(--indigo-dim);color:var(--indigo);font-size:10px;font-weight:700;padding:3px 10px;border-radius:9999px;border:1px solid var(--indigo-mid);white-space:nowrap;}
+.seg{display:flex;gap:3px;background:var(--bg4);border:1px solid var(--border2);border-radius:9999px;padding:2px;}
+.seg-btn{font-size:11px;color:var(--text2);padding:3px 12px;border-radius:9999px;cursor:pointer;font-weight:500;border:none;background:transparent;}
+.seg-btn.on{background:var(--indigo);color:#fff;font-weight:700;}
 #content{padding:18px 20px;max-width:1500px;margin:0 auto;}
 #loadingMsg{display:flex;align-items:center;justify-content:center;height:260px;color:var(--text2);gap:11px;font-size:13px;}
 .spinner{width:16px;height:16px;border:2px solid var(--border2);border-top-color:var(--indigo);border-radius:50%;animation:spin 0.7s linear infinite;}
@@ -60,6 +63,7 @@ select:hover,select:focus{border-color:var(--indigo);}
 .card-title{font-size:12px;font-weight:600;color:var(--text);}
 .card-sub{font-size:10px;color:var(--text3);margin-top:2px;}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.g21{display:grid;grid-template-columns:1.2fr 1fr;gap:10px;margin-bottom:10px;}
 .mb10{margin-bottom:10px;}
 .tw{overflow-x:auto;border-radius:7px;}
 table.dt{width:100%;border-collapse:collapse;font-size:11.5px;}
@@ -70,6 +74,7 @@ table.dt tr:hover td{background:rgba(91,94,244,0.035);}
 table.dt .n{text-align:right;font-variant-numeric:tabular-nums;font-weight:500;}
 table.dt .lbl{color:var(--text2);}
 .tr-tot td{font-weight:700;border-top:1px solid var(--border2)!important;background:var(--bg3)!important;}
+.tr-sec td{font-weight:700;color:var(--indigo)!important;background:rgba(91,94,244,0.05)!important;font-size:10px;text-transform:uppercase;letter-spacing:0.6px;}
 .tr-sub td{color:var(--text3);font-size:10.5px;}
 .pos{color:var(--emerald);}.negv{color:var(--rose);}.mut{color:var(--text3);}
 .missions{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:9px;margin-bottom:10px;}
@@ -82,7 +87,7 @@ table.dt .lbl{color:var(--text2);}
 .mc-title{font-size:12px;font-weight:600;margin-bottom:3px;}
 .mc-desc{font-size:11px;color:var(--text2);line-height:1.5;}
 .note{font-size:10.5px;color:var(--text3);margin-top:8px;line-height:1.5;}
-@media(max-width:900px){.g2{grid-template-columns:1fr;}}
+@media(max-width:900px){.g2,.g21{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
@@ -93,26 +98,35 @@ table.dt .lbl{color:var(--text2);}
       <div class="tb-icon"><svg viewBox="0 0 16 16"><polyline points="1,13 4,8 7,10 10,5 13,7"/><circle cx="13" cy="7" r="1.5" fill="#fff" stroke="none"/></svg></div>
       <div>
         <div class="tb-brand">LLUVIA<em>DIGITAL</em></div>
-        <div class="tb-ver">P&amp;L ENGINE · v1</div>
+        <div class="tb-ver">P&amp;L ENGINE · v2</div>
       </div>
     </div>
     <span class="badge" id="badgeActive">Cargando…</span>
   </div>
   <div class="tb-nav">
-    <div class="nav-pill on" onclick="navGo('s-resumen',this)">Resumen</div>
-    <div class="nav-pill" onclick="navGo('s-3p',this)">P&amp;L 3P</div>
-    <div class="nav-pill" onclick="navGo('s-canales',this)">Canales</div>
-    <div class="nav-pill" onclick="navGo('s-1p',this)">P&amp;L 1P</div>
+    <div class="nav-pill on" onclick="navGo('s-panel',this)">Panel</div>
+    <div class="nav-pill" id="np-canales" onclick="navGo('s-canales',this)">Canales</div>
+    <div class="nav-pill" id="np-1p" onclick="navGo('s-1p',this)">1P</div>
     <div class="nav-pill" onclick="navGo('s-alertas',this)">Alertas</div>
     <div class="nav-pill" onclick="navGo('s-tasas',this)">Tasas</div>
     <div class="nav-pill" onclick="navGo('s-datos',this)">Datos</div>
   </div>
   <div class="tb-filters">
     <button class="btn" onclick="loadData()">↻ Actualizar</button>
-    <div class="fg"><label>Año:</label><select id="fAnio" onchange="renderAll()"></select></div>
+    <div class="seg" id="segModo">
+      <button class="seg-btn on" onclick="setModo('mes',this)">Mes</button>
+      <button class="seg-btn" onclick="setModo('anio',this)">Año</button>
+    </div>
+    <div class="fg" id="fgMes"><label>Mes:</label><select id="fMes" onchange="renderAll()"></select></div>
+    <div class="fg"><label>Año:</label><select id="fAnio" onchange="fillMeses();renderAll()"></select></div>
+    <div class="seg" id="segScope">
+      <button class="seg-btn on" onclick="setScope('all',this)">Consolidado</button>
+      <button class="seg-btn" onclick="setScope('3p',this)">Solo 3P</button>
+      <button class="seg-btn" onclick="setScope('1p',this)">Solo 1P</button>
+    </div>
     <div class="fg"><label>Razón social (3P):</label>
       <select id="fBase" onchange="renderAll()">
-        <option value="">Consolidado</option>
+        <option value="">Ambas</option>
         <option value="Archibrand">Archibrand</option>
         <option value="Codevaran">Codevaran</option>
       </select>
@@ -125,45 +139,36 @@ table.dt .lbl{color:var(--text2);}
   <div id="errorBox" class="error-box" style="display:none;"></div>
   <div id="dashboard" style="display:none;">
 
-    <div class="sec" id="s-resumen">
-      <div class="sec-hd"><span class="sec-title">Resumen consolidado (3P + 1P · sin IVA)</span><div class="sec-line"></div></div>
+    <div class="sec" id="s-panel">
+      <div class="sec-hd"><span class="sec-title" id="titPanel">P&amp;L</span><div class="sec-line"></div></div>
       <div class="kpis mb10" id="kpisMain"></div>
-      <div class="g2">
-        <div class="card"><div class="card-hd"><div><div class="card-title">Ingresos por mes</div><div class="card-sub">Venta 3P + Sell In 1P · línea = MB%</div></div></div>
-          <div style="position:relative;height:220px;"><canvas id="chartCons"></canvas></div></div>
-        <div class="card"><div class="card-hd"><div class="card-title">P&amp;L consolidado mensual</div></div>
-          <div class="tw" id="tablaCons"></div></div>
+      <div class="g21" id="panelGrid">
+        <div class="card"><div class="card-hd"><div><div class="card-title" id="titTabla">P&amp;L</div><div class="card-sub" id="subTabla"></div></div></div>
+          <div class="tw" id="tablaPL"></div></div>
+        <div class="card"><div class="card-hd"><div class="card-title" id="titChart"></div></div>
+          <div style="position:relative;height:300px;"><canvas id="chartMain"></canvas></div></div>
       </div>
-    </div>
-
-    <div class="sec" id="s-3p">
-      <div class="sec-hd"><span class="sec-title">P&amp;L 3P — marketplaces (Sale · 3P)</span><div class="sec-line"></div></div>
-      <div class="g2">
-        <div class="card"><div class="card-hd"><div class="card-title">Bajada mensual</div><div class="card-sub" id="sub3p"></div></div>
-          <div class="tw" id="tabla3p"></div></div>
-        <div class="card"><div class="card-hd"><div class="card-title">Margen bruto 3P</div></div>
-          <div style="position:relative;height:240px;"><canvas id="chart3p"></canvas></div>
-          <div class="tw" style="margin-top:10px;" id="tablaEnt"></div></div>
-      </div>
+      <div class="card" id="cardAnio3p" style="margin-bottom:10px;">
+        <div class="card-hd"><div class="card-title">P&amp;L 3P mensual</div><div class="card-sub" id="sub3p"></div></div>
+        <div class="tw" id="tabla3p"></div></div>
     </div>
 
     <div class="sec" id="s-canales">
       <div class="sec-hd"><span class="sec-title">3P por canal</span><div class="sec-line"></div></div>
-      <div class="card"><div class="tw" id="tablaCanales"></div>
-        <div class="note">Cada celda: venta sin IVA · MB% del canal en el mes.</div></div>
+      <div class="card"><div class="tw" id="tablaCanales"></div><div class="note" id="noteCanales"></div></div>
     </div>
 
     <div class="sec" id="s-1p">
-      <div class="sec-hd"><span class="sec-title">P&amp;L 1P — venta wholesale (fuente: pestañas CSV)</span><div class="sec-line"></div></div>
-      <div class="g2" id="bloques1p"></div>
+      <div class="sec-hd"><span class="sec-title">P&amp;L 1P — venta wholesale</span><div class="sec-line"></div></div>
+      <div id="bloques1p"></div>
     </div>
 
     <div class="sec" id="s-alertas">
       <div class="sec-hd"><span class="sec-title">Alertas</span><div class="sec-line"></div></div>
       <div class="missions" id="missionsGrid"></div>
       <div class="g2">
-        <div class="card"><div class="card-hd"><div class="card-title">UPCs sin landed (impacto)</div></div><div class="tw" id="tablaSinLanded"></div></div>
-        <div class="card"><div class="card-hd"><div class="card-title">SKUs 3P con margen negativo</div><div class="card-sub">año seleccionado · venta &gt; $1,000</div></div><div class="tw" id="tablaNeg"></div></div>
+        <div class="card"><div class="card-hd"><div class="card-title">UPCs sin landed (impacto 3P)</div></div><div class="tw" id="tablaSinLanded"></div></div>
+        <div class="card"><div class="card-hd"><div class="card-title">SKUs 3P con margen negativo</div><div class="card-sub" id="subNeg"></div></div><div class="tw" id="tablaNeg"></div></div>
       </div>
     </div>
 
@@ -172,23 +177,20 @@ table.dt .lbl{color:var(--text2);}
       <div class="g2">
         <div class="card"><div class="card-hd"><div class="card-title">Comisiones por canal · bandas de envío</div></div><div class="tw" id="tablaTasas"></div></div>
         <div class="card"><div class="card-hd"><div class="card-title">Rebates 1P · gastos operativos</div></div><div class="tw" id="tablaRebates"></div>
-          <div class="note">Para cambiar cualquier valor: edita las pestañas <b>TASAS</b>, <b>REBATES_1P</b> o <b>GASTOS_OP</b> del Google Sheet y pulsa <b>↻ Actualizar</b>. Regla del motor: Venta = total ÷ IVA · Comisión = % × (precio×pzas) ÷ IVA · Envío = banda por orden ÷ IVA · COGS = landed × pzas.</div></div>
+          <div class="note">Edita las pestañas <b>TASAS</b>, <b>REBATES_1P</b> o <b>GASTOS_OP</b> del Google Sheet y pulsa <b>↻ Actualizar</b>. Motor: Venta = total ÷ IVA · Comisión = % × (precio×pzas) ÷ IVA · Envío = banda por orden ÷ IVA · COGS = landed × pzas.</div></div>
       </div>
     </div>
 
     <div class="sec" id="s-datos">
       <div class="sec-hd"><span class="sec-title">Estado de datos</span><div class="sec-line"></div></div>
-      <div class="card"><div class="tw" id="tablaDatos"></div></div>
+      <div class="card"><div class="tw" id="tablaDatos"></div>
+        <div class="note">"Último dato" = fecha más reciente con registros en esa fuente. Verifica que el mes que analizas esté completo.</div></div>
     </div>
 
   </div>
 </div>
 
 <script>
-/* ════════════════════════════════════════════════════
-   CONFIG — restringir la API key por referrer HTTP
-   (Google Cloud Console → Credenciales) antes de publicar.
-   ════════════════════════════════════════════════════ */
 const CFG = Object.freeze({
   SHEET_ARCH : '11RVQAPpuZpPxZXtH1Zg1Qozy84bzj7SJ1pykoM1xoYo',
   SHEET_CODE : '1cE8U9eMLdJRQnDgez8GlwgJw1iDIKcnBE8M3IDFYYGc',
@@ -199,9 +201,10 @@ const CFG = Object.freeze({
   TAB_CODE   : 'Codevaran'
 });
 const MNAMES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const MFULL=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const fmt=n=>{const a=Math.abs(n);if(a>=1e6)return '$'+(n/1e6).toFixed(2)+'M';if(a>=1e3)return '$'+(n/1e3).toFixed(1)+'k';return '$'+Math.round(n).toLocaleString('es-MX');};
-const fmtF=n=>'$'+Math.round(n).toLocaleString('es-MX');
 const mLbl=m=>{const[y,mm]=m.split('-');return MNAMES[+mm-1]+' '+y.slice(2);};
+const mFull=m=>{const[y,mm]=m.split('-');return MFULL[+mm-1]+' '+y;};
 
 /*ENGINE-START*/
 function normU(u){let s=String(u==null?'':u).trim();if(s.endsWith('.0'))s=s.slice(0,-2);return s;}
@@ -213,6 +216,8 @@ function parseDateAny(s){
   if(m)return m[3]+'-'+String(m[2]).padStart(2,'0')+'-'+String(m[1]).padStart(2,'0');
   return null;
 }
+function prevMes(m){let[y,mm]=m.split('-').map(Number);mm--;if(mm<1){mm=12;y--;}return y+'-'+String(mm).padStart(2,'0');}
+function yoyMes(m){const[y,mm]=m.split('-');return (Number(y)-1)+'-'+mm;}
 const ALIAS={date:['date','fecha utc-6','order_created_at_date','fecha'],status:['order_status'],
  otype:['order_type'],channel:['channel'],sku:['items.sku','item_sku','upc'],
  qty:['items.quantity','item_quantity'],price:['items.price','item_price'],
@@ -226,6 +231,7 @@ function rowsToObjects(values){
   for(const k in ALIAS){const i=hdr.findIndex(h=>ALIAS[k].includes(h));if(i>=0)idx[k]=i;}
   return values.slice(1).map(r=>{const o={};for(const k in idx)o[k]=r[idx[k]];return o;});
 }
+function maxDate(rows){let mx=null;rows.forEach(r=>{const d=parseDateAny(r.date);if(d&&(!mx||d>mx))mx=d;});return mx;}
 function buildLandedMap(values){
   const m={};rowsToObjects(values).forEach(r=>{
     const u=normU(r.sku),v=String(r.landed==null?'':r.landed).trim();
@@ -298,7 +304,7 @@ function compute3P(rows,T,L,entFilter){
     c.venta+=o.tot/T.IVA;c.com+=com/T.IVA;c.env+=env/T.IVA;
     const e=E[o.mes]=E[o.mes]||{};e[o.ent]=(e[o.ent]||0)+o.tot/T.IVA;
   }
-  const skuAgg={};
+  const skuMes={};
   lines.forEach(l=>{
     const m=M[l.mes];if(m){m.cogs+=l.cogs;m.pzas+=l.qty;}
     const cKey=l.mes+'|'+l.channel;if(C[cKey])C[cKey].cogs+=l.cogs;
@@ -308,13 +314,14 @@ function compute3P(rows,T,L,entFilter){
     const w=o&&o.ixq>0?l.ixq/o.ixq:1;
     const envL=o?o.env*w:0;
     const comL=(T.COM[l.channel]||0)*(l.ixq>0?l.ixq:l.tot);
-    const sk=skuAgg[l.sku]=skuAgg[l.sku]||{sku:l.sku,name:l.name,venta:0,pzas:0,mb:0};
+    const kk=l.mes+'|'+l.sku;
+    const sk=skuMes[kk]=skuMes[kk]||{mes:l.mes,sku:l.sku,name:l.name,venta:0,pzas:0,mb:0};
     sk.venta+=l.ixq/T.IVA;sk.pzas+=l.qty;
     sk.mb+=l.ixq/T.IVA-comL/T.IVA-envL/T.IVA-l.cogs;
     if(l.name&&!sk.name)sk.name=l.name;
   });
   for(const m in M)M[m].mb=M[m].venta-M[m].com-M[m].env-M[m].cogs;
-  return {M,C,E,SL,skuAgg};
+  return {M,C,E,SL,skuMes};
 }
 function computeCanceladas(rows,T,entFilter){
   const X={};
@@ -352,11 +359,31 @@ function compute1Pfull(siRows,soRows,T,R,retailer,L){
   }
   return M;
 }
+const Z3={venta:0,com:0,env:0,cogs:0,mb:0,ordenes:0,pzas:0};
+const Z1={sellin:0,rfijo:0,rvar:0,log:0,cogs:0,mb:0,sellout:0,pzas:0,soPzas:0,siNoLanded:0};
+function monthPack(R3,P1,G,mes,scope){
+  const t=R3.M[mes]||Z3;
+  const ml=P1['Mercado Libre'][mes]||Z1, az=P1['Amazon'][mes]||Z1;
+  const p={mes};
+  p.v3=scope!=='1p'?t.venta:0; p.com=scope!=='1p'?t.com:0; p.env=scope!=='1p'?t.env:0;
+  p.cogs3=scope!=='1p'?t.cogs:0; p.mb3=scope!=='1p'?t.mb:0;
+  p.ordenes=scope!=='1p'?t.ordenes:0; p.pzas3=scope!=='1p'?t.pzas:0;
+  const use1=scope!=='3p';
+  p.v1=use1?ml.sellin+az.sellin:0;
+  p.rfijo=use1?ml.rfijo+az.rfijo:0; p.rvar=use1?ml.rvar+az.rvar:0;
+  p.log=use1?ml.log+az.log:0; p.cogs1=use1?ml.cogs+az.cogs:0;
+  p.mb1=use1?ml.mb+az.mb:0;
+  p.sellout=use1?ml.sellout+az.sellout:0;
+  p.ing=p.v3+p.v1; p.cogs=p.cogs3+p.cogs1; p.mb=p.mb3+p.mb1;
+  p.gastos=(G[mes]?G[mes].total:0);
+  p.uti=p.mb-p.gastos;
+  return p;
+}
 /*ENGINE-END*/
 
 /* ── State ─────────────────────────────────────── */
 let RAW={}, T=null, R=null, G=null, L={}, health=[], charts={};
-let R3=null, CANC=null, P1={};
+let R3=null, CANC=null, P1={}, MODO='mes', SCOPE='all';
 
 async function fetchTab(sheetId,tab){
   const url=`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(tab)}?key=${CFG.API_KEY}`;
@@ -371,8 +398,8 @@ async function loadData(){
   document.getElementById('dashboard').style.display='none';
   health=[];
   const jobs=[
-    ['ventas ARC',()=>fetchTab(CFG.SHEET_ARCH,CFG.TABS_ARCH.ventas),'ventasA',true],
-    ['ventas CDV',()=>fetchTab(CFG.SHEET_CODE,CFG.TAB_CODE),'ventasC',true],
+    ['ventas ARC (3P)',()=>fetchTab(CFG.SHEET_ARCH,CFG.TABS_ARCH.ventas),'ventasA',true],
+    ['ventas CDV (3P)',()=>fetchTab(CFG.SHEET_CODE,CFG.TAB_CODE),'ventasC',true],
     ['1P_SI_ML',()=>fetchTab(CFG.SHEET_PL,CFG.TABS_ARCH.si_ml),'si_ml',true],
     ['1P_SI_AMZ',()=>fetchTab(CFG.SHEET_PL,CFG.TABS_ARCH.si_amz),'si_amz',true],
     ['1P_SO_ML',()=>fetchTab(CFG.SHEET_PL,CFG.TABS_ARCH.so_ml),'so_ml',true],
@@ -386,15 +413,15 @@ async function loadData(){
   let fatal=[];
   results.forEach((res,i)=>{
     const [label,,key,required]=jobs[i];
-    if(res.status==='fulfilled'){RAW[key]=res.value;health.push({tab:label,ok:true,filas:Math.max(0,res.value.length-1)});}
-    else{RAW[key]=null;health.push({tab:label,ok:false,filas:0,err:res.reason.message});
+    if(res.status==='fulfilled'){RAW[key]=res.value;health.push({tab:label,ok:true,filas:Math.max(0,res.value.length-1),last:null});}
+    else{RAW[key]=null;health.push({tab:label,ok:false,filas:0,err:res.reason.message,last:null});
       if(required)fatal.push(label+': '+res.reason.message);}
   });
   document.getElementById('loadingMsg').style.display='none';
   if(fatal.length){
     const eb=document.getElementById('errorBox');
     eb.innerHTML='No pude cargar: '+fatal.join(' · ')+' <button class="retry-btn" onclick="loadData()">Reintentar</button>'+
-      '<div class="note">Verifica que las pestañas existan en el Sheet con esos nombres exactos y que estén publicadas.</div>';
+      '<div class="note">Verifica que las pestañas existan con esos nombres exactos y que el Sheet esté compartido como "Cualquiera con el enlace: Lector".</div>';
     eb.style.display='block';
     if(!RAW.ventasA&&!RAW.ventasC)return;
   }
@@ -409,74 +436,65 @@ async function loadData(){
   RAW.p_si_amz=rowsToObjects(RAW.si_amz||[]);
   RAW.p_so_ml=rowsToObjects(RAW.so_ml||[]);
   RAW.p_so_amz=rowsToObjects(RAW.so_amz||[]);
-  // años disponibles
+  // frescura
+  const fres={'ventas ARC (3P)':rowsA,'ventas CDV (3P)':rowsC,'1P_SI_ML':RAW.p_si_ml,'1P_SI_AMZ':RAW.p_si_amz,'1P_SO_ML':RAW.p_so_ml,'1P_SO_AMZ':RAW.p_so_amz};
+  health.forEach(h=>{if(fres[h.tab])h.last=maxDate(fres[h.tab]);});
+  // años
   const yrs=new Set();
   RAW.yuju.forEach(r=>{const d=parseDateAny(r.date);if(d)yrs.add(d.slice(0,4));});
   const sel=document.getElementById('fAnio');const cur=sel.value;
   sel.innerHTML='';[...yrs].sort().reverse().forEach(y=>{const o=document.createElement('option');o.value=y;o.textContent=y;sel.appendChild(o);});
-  if(cur&&[...yrs].includes(cur))sel.value=cur;
+  if(cur&&yrs.has(cur))sel.value=cur;
+  fillMeses(true);
   document.getElementById('dashboard').style.display='block';
   renderAll();
 }
 
-function meses(obj,anio){return Object.keys(obj).filter(m=>m.startsWith(anio)).sort();}
-function unionMeses(anio,...objs){
-  const s=new Set();objs.forEach(o=>Object.keys(o).forEach(m=>{if(m.startsWith(anio))s.add(m);}));
+function mesesDisponibles(anio){
+  const s=new Set();
+  const scan=rows=>rows.forEach(r=>{const d=parseDateAny(r.date);if(d&&d.slice(0,4)===anio)s.add(d.slice(0,7));});
+  scan(RAW.yuju||[]);scan(RAW.p_si_ml||[]);scan(RAW.p_si_amz||[]);scan(RAW.p_so_ml||[]);scan(RAW.p_so_amz||[]);
   return [...s].sort();
 }
+function fillMeses(pickLast){
+  const anio=document.getElementById('fAnio').value;
+  const ms=mesesDisponibles(anio);
+  const sel=document.getElementById('fMes');const cur=sel.value;
+  sel.innerHTML='';ms.forEach(m=>{const o=document.createElement('option');o.value=m;o.textContent=mFull(m);sel.appendChild(o);});
+  if(!pickLast&&cur&&ms.includes(cur))sel.value=cur;else if(ms.length)sel.value=ms[ms.length-1];
+}
+function setModo(m,btn){MODO=m;document.querySelectorAll('#segModo .seg-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');
+  document.getElementById('fgMes').style.display=m==='mes'?'flex':'none';renderAll();}
+function setScope(s,btn){SCOPE=s;document.querySelectorAll('#segScope .seg-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderAll();}
+
+function meses(obj,anio){return Object.keys(obj).filter(m=>m.startsWith(anio)).sort();}
+function unionMeses(anio){
+  const s=new Set();
+  [R3.M,P1['Mercado Libre'],P1['Amazon']].forEach(o=>Object.keys(o).forEach(m=>{if(m.startsWith(anio))s.add(m);}));
+  return [...s].sort();
+}
+function mkChart(id,cfg){if(charts[id])charts[id].destroy();const c=document.getElementById(id);if(c)charts[id]=new Chart(c,cfg);}
+const AX={ticks:{color:'#3e4a62',font:{size:10}},grid:{color:'rgba(30,37,64,0.9)'}};
+function dPct(cur,prev){if(prev==null||!isFinite(prev)||prev===0)return null;return (cur-prev)/Math.abs(prev)*100;}
+function dHtml(d){if(d===null)return '<span class="mut">—</span>';const c=d>=0?'pos':'negv';const a=d>=0?'↑':'↓';return `<span class="${c}">${a} ${Math.abs(d).toFixed(1)}%</span>`;}
 
 function renderAll(){
-  const anio=document.getElementById('fAnio').value;
   const ent=document.getElementById('fBase').value||null;
   R3=compute3P(RAW.yuju,T,L,ent);
   CANC=computeCanceladas(RAW.yuju,T,ent);
   P1['Mercado Libre']=compute1Pfull(RAW.p_si_ml,RAW.p_so_ml,T,R,'Mercado Libre',L);
   P1['Amazon']=compute1Pfull(RAW.p_si_amz,RAW.p_so_amz,T,R,'Amazon',L);
-  document.getElementById('badgeActive').textContent=(ent||'CONSOLIDADO')+' · '+anio;
-  renderResumen(anio);render3P(anio);renderCanales(anio);render1P(anio);
-  renderAlertas(anio);renderTasas();renderDatos();
-}
-
-function mkChart(id,cfg){if(charts[id])charts[id].destroy();const c=document.getElementById(id);if(c)charts[id]=new Chart(c,cfg);}
-const AX={ticks:{color:'#3e4a62',font:{size:10}},grid:{color:'rgba(30,37,64,0.9)'}};
-
-function renderResumen(anio){
-  const ms=unionMeses(anio,R3.M,P1['Mercado Libre'],P1['Amazon']);
-  const v3=ms.map(m=>R3.M[m]?.venta||0), mb3=ms.map(m=>R3.M[m]?.mb||0);
-  const v1=ms.map(m=>(P1['Mercado Libre'][m]?.sellin||0)+(P1['Amazon'][m]?.sellin||0));
-  const mb1=ms.map(m=>(P1['Mercado Libre'][m]?.mb||0)+(P1['Amazon'][m]?.mb||0));
-  const ing=ms.map((_,i)=>v3[i]+v1[i]), mb=ms.map((_,i)=>mb3[i]+mb1[i]);
-  const gas=ms.map(m=>G[m]?.total||0);
-  const hayG=gas.some(x=>x>0);
-  const uti=ms.map((_,i)=>mb[i]-gas[i]);
-  const S=a=>a.reduce((x,y)=>x+y,0);
-  const mbp=S(ing)?S(mb)/S(ing)*100:0;
-  document.getElementById('kpisMain').innerHTML=
-    kpi('c-sky','Ingresos '+anio,fmt(S(ing)),'3P + Sell In 1P')+
-    kpi('c-ind','Venta 3P',fmt(S(v3)),S(ing)?(S(v3)/S(ing)*100).toFixed(0)+'% del total':'')+
-    kpi('c-vio','Sell In 1P',fmt(S(v1)),S(ing)?(S(v1)/S(ing)*100).toFixed(0)+'% del total':'')+
-    kpi('c-eme','Margen bruto',fmt(S(mb)),mbp.toFixed(1)+'%')+
-    (hayG?kpi('c-amb','Gastos op.',fmt(S(gas)),'GASTOS_OP')+kpi('c-ros','Utilidad',fmt(S(uti)),S(ing)?(S(uti)/S(ing)*100).toFixed(1)+'%':''):'');
-  mkChart('chartCons',{type:'bar',data:{labels:ms.map(mLbl),datasets:[
-    {label:'Venta 3P',data:v3.map(Math.round),backgroundColor:'#5b5ef4',stack:'a',borderRadius:3},
-    {label:'Sell In 1P',data:v1.map(Math.round),backgroundColor:'#8b5cf6',stack:'a',borderRadius:3},
-    {label:'MB %',data:ms.map((_,i)=>ing[i]?+(mb[i]/ing[i]*100).toFixed(1):0),type:'line',yAxisID:'y1',borderColor:'#f09e0b',backgroundColor:'transparent',borderWidth:2,pointRadius:3,pointBackgroundColor:'#f09e0b'}
-  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:'#8892a4',font:{size:10},padding:10}},
-    tooltip:{callbacks:{label:c=>c.dataset.label==='MB %'?' MB '+c.parsed.y+'%':' '+c.dataset.label+': '+fmt(c.parsed.y)}}},
-    scales:{x:{...AX,stacked:true},y:{...AX,stacked:true,ticks:{...AX.ticks,callback:v=>fmt(v)}},
-    y1:{position:'right',ticks:{color:'#f09e0b',font:{size:10},callback:v=>v+'%'},grid:{display:false}}}}});
-  let rows=[['Ingresos',ing,''],['· Venta 3P',v3,'sub'],['· Sell In 1P',v1,'sub'],
-    ['Margen bruto 3P',mb3,''],['Margen bruto 1P',mb1,''],['MARGEN BRUTO',mb,'tot']];
-  if(hayG)rows.push(['Gastos operativos',gas,''],['UTILIDAD',uti,'tot']);
-  let h='<table class="dt"><thead><tr><th>Línea</th>'+ms.map(m=>'<th class="n">'+mLbl(m)+'</th>').join('')+'<th class="n">Total</th></tr></thead><tbody>';
-  rows.forEach(([lbl,arr,cls])=>{
-    h+='<tr class="'+(cls==='tot'?'tr-tot':cls==='sub'?'tr-sub':'')+'"><td class="lbl">'+lbl+'</td>';
-    arr.forEach(v=>h+='<td class="n">'+fmt(v)+'</td>');
-    h+='<td class="n">'+fmt(S(arr))+'</td></tr>';
-  });
-  h+='<tr><td class="lbl">MB %</td>'+ms.map((_,i)=>'<td class="n mut">'+(ing[i]?(mb[i]/ing[i]*100).toFixed(1)+'%':'—')+'</td>').join('')+'<td class="n">'+mbp.toFixed(1)+'%</td></tr>';
-  h+='</tbody></table>';
-  document.getElementById('tablaCons').innerHTML=h;
+  const anio=document.getElementById('fAnio').value;
+  const mes=document.getElementById('fMes').value;
+  const sc={all:'CONSOLIDADO','3p':'SOLO 3P','1p':'SOLO 1P'}[SCOPE];
+  document.getElementById('badgeActive').textContent=sc+' · '+(MODO==='mes'?mFull(mes):anio)+(ent?' · '+ent:'');
+  document.getElementById('s-canales').style.display=SCOPE==='1p'?'none':'';
+  document.getElementById('np-canales').style.display=SCOPE==='1p'?'none':'';
+  document.getElementById('s-1p').style.display=SCOPE==='3p'?'none':'';
+  document.getElementById('np-1p').style.display=SCOPE==='3p'?'none':'';
+  document.getElementById('cardAnio3p').style.display=(MODO==='anio'&&SCOPE!=='1p')?'':'none';
+  if(MODO==='mes')renderMes(mes);else renderAnio(anio);
+  renderCanales(anio,mes);render1P(anio,mes);renderAlertas(anio,mes);renderTasas();renderDatos();
 }
 
 function kpi(cls,lbl,val,sub){
@@ -484,126 +502,263 @@ function kpi(cls,lbl,val,sub){
   return `<div class="kpi ${cls}"><div class="kpi-lbl">${lbl}</div><div class="kpi-val" style="color:var(--${col})">${val}</div>${sub?`<div class="kpi-sub">${sub}</div>`:''}</div>`;
 }
 
-function render3P(anio){
-  const ms=meses(R3.M,anio);
-  document.getElementById('sub3p').textContent='sin IVA · '+(document.getElementById('fBase').value||'consolidado');
-  const S=k=>ms.reduce((a,m)=>a+(R3.M[m][k]||0),0);
-  const lineas=[['Venta','venta',''],['Comisiones','com',''],['Envío','env',''],['COGS (landed)','cogs',''],['MARGEN BRUTO','mb','tot']];
-  let h='<table class="dt"><thead><tr><th>Línea</th>'+ms.map(m=>'<th class="n">'+mLbl(m)+'</th>').join('')+'<th class="n">Total</th><th class="n">% Venta</th></tr></thead><tbody>';
+/* ══ MODO MES ══ */
+function renderMes(mes){
+  document.getElementById('titPanel').textContent='P&L de '+mFull(mes)+' — '+({all:'consolidado 3P + 1P','3p':'solo 3P','1p':'solo 1P'}[SCOPE])+' (sin IVA)';
+  const p=monthPack(R3,P1,G,mes,SCOPE);
+  const pa=monthPack(R3,P1,G,prevMes(mes),SCOPE);
+  const py=monthPack(R3,P1,G,yoyMes(mes),SCOPE);
+  const mbp=p.ing?p.mb/p.ing*100:0;
+  document.getElementById('kpisMain').innerHTML=
+    kpi('c-sky','Ingresos',fmt(p.ing),'vs mes ant: '+(dPct(p.ing,pa.ing)===null?'—':(dPct(p.ing,pa.ing)>=0?'+':'')+dPct(p.ing,pa.ing).toFixed(1)+'%'))+
+    kpi('c-eme','Margen bruto',fmt(p.mb),mbp.toFixed(1)+'% de ingresos')+
+    kpi('c-amb','MB vs mes anterior',dPct(p.mb,pa.mb)===null?'—':(dPct(p.mb,pa.mb)>=0?'+':'')+dPct(p.mb,pa.mb).toFixed(1)+'%','ant: '+fmt(pa.mb))+
+    kpi('c-vio','MB vs año anterior',dPct(p.mb,py.mb)===null?'—':(dPct(p.mb,py.mb)>=0?'+':'')+dPct(p.mb,py.mb).toFixed(1)+'%',mLbl(yoyMes(mes))+': '+fmt(py.mb))+
+    (SCOPE!=='1p'?kpi('c-ind','Órdenes 3P',p.ordenes.toLocaleString(),p.pzas3.toLocaleString()+' pzas'):'')+
+    (p.gastos?kpi('c-ros','Utilidad',fmt(p.uti),'después de '+fmt(p.gastos)+' gastos op.'):'');
+  // tabla vertical
+  document.getElementById('titTabla').textContent='Bajada del mes';
+  document.getElementById('subTabla').textContent='monto · % de ingresos · Δ vs '+mLbl(prevMes(mes))+' · Δ vs '+mLbl(yoyMes(mes));
+  const rows=[];
+  const add=(lbl,k,cls)=>rows.push({lbl,cur:p[k],prev:pa[k],yoy:py[k],cls});
+  if(SCOPE==='all'){
+    add('INGRESOS','ing','tot');add('· Venta 3P','v3','sub');add('· Sell In 1P','v1','sub');
+    rows.push({lbl:'3P',cls:'sec'});add('Comisiones','com');add('Envío','env');add('COGS 3P','cogs3');add('Margen bruto 3P','mb3','b');
+    rows.push({lbl:'1P',cls:'sec'});add('Rebate fijo','rfijo');add('Rebate variable','rvar');add('Logístico','log');add('COGS 1P','cogs1');add('Margen bruto 1P','mb1','b');
+    add('MARGEN BRUTO TOTAL','mb','tot');
+    if(p.gastos||pa.gastos||py.gastos){add('Gastos operativos','gastos');add('UTILIDAD','uti','tot');}
+  }else if(SCOPE==='3p'){
+    add('Venta','v3','tot');add('Comisiones','com');add('Envío','env');add('COGS','cogs3');add('MARGEN BRUTO','mb3','tot');
+  }else{
+    add('Sell In','v1','tot');add('Rebate fijo','rfijo');add('Rebate variable','rvar');add('Logístico','log');add('COGS','cogs1');add('MARGEN BRUTO','mb1','tot');
+    add('Sell Out (info)','sellout','sub');
+  }
+  let h='<table class="dt"><thead><tr><th>Línea</th><th class="n">Monto</th><th class="n">% Ing.</th><th class="n">Δ mes ant</th><th class="n">Δ año ant</th></tr></thead><tbody>';
+  rows.forEach(r=>{
+    if(r.cls==='sec'){h+=`<tr class="tr-sec"><td colspan="5">${r.lbl}</td></tr>`;return;}
+    const cls=r.cls==='tot'?'tr-tot':r.cls==='sub'?'tr-sub':'';
+    const bold=r.cls==='b'?'font-weight:700;':'';
+    h+=`<tr class="${cls}"><td class="lbl" style="${bold}">${r.lbl}</td><td class="n" style="${bold}">${fmt(r.cur)}</td>`+
+       `<td class="n mut">${p.ing?(r.cur/p.ing*100).toFixed(1)+'%':'—'}</td>`+
+       `<td class="n">${dHtml(dPct(r.cur,r.prev))}</td><td class="n">${dHtml(dPct(r.cur,r.yoy))}</td></tr>`;
+  });
+  const mbpA=pa.ing?pa.mb/pa.ing*100:null, mbpY=py.ing?py.mb/py.ing*100:null;
+  h+=`<tr><td class="lbl">MB %</td><td class="n">${mbp.toFixed(1)}%</td><td></td><td class="n mut">${mbpA===null?'—':'ant '+mbpA.toFixed(1)+'%'}</td><td class="n mut">${mbpY===null?'—':'aa '+mbpY.toFixed(1)+'%'}</td></tr>`;
+  h+='</tbody></table>';
+  document.getElementById('tablaPL').innerHTML=h;
+  // waterfall
+  document.getElementById('titChart').textContent='Cascada: de ingresos a margen — '+mLbl(mes);
+  const steps=[];
+  steps.push({lbl:'Ingresos',v:p.ing,tipo:'in'});
+  if(SCOPE!=='1p'){steps.push({lbl:'Comisiones',v:-p.com,tipo:'out'});steps.push({lbl:'Envío',v:-p.env,tipo:'out'});}
+  if(SCOPE!=='3p'){steps.push({lbl:'Rebates 1P',v:-(p.rfijo+p.rvar),tipo:'out'});steps.push({lbl:'Logístico',v:-p.log,tipo:'out'});}
+  steps.push({lbl:'COGS',v:-p.cogs,tipo:'out'});
+  if(p.gastos)steps.push({lbl:'Gastos op.',v:-p.gastos,tipo:'out'});
+  steps.push({lbl:p.gastos?'Utilidad':'Margen bruto',v:p.gastos?p.uti:p.mb,tipo:'fin'});
+  let acc=0;const data=[],colors=[];
+  steps.forEach(s=>{
+    if(s.tipo==='in'){data.push([0,s.v]);acc=s.v;colors.push('#5b5ef4');}
+    else if(s.tipo==='out'){data.push([acc+s.v,acc]);acc+=s.v;colors.push('#f03a5a');}
+    else{data.push([0,s.v]);colors.push(s.v>=0?'#0fb981':'#f03a5a');}
+  });
+  mkChart('chartMain',{type:'bar',data:{labels:steps.map(s=>s.lbl),datasets:[{data,backgroundColor:colors,borderRadius:4,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},
+      tooltip:{callbacks:{label:c=>{const s=steps[c.dataIndex];return ' '+fmt(Math.abs(s.v))+(s.tipo==='out'?' (deducción)':'');}}}},
+      scales:{x:{...AX,ticks:{...AX.ticks,maxRotation:45}},y:{...AX,ticks:{...AX.ticks,callback:v=>fmt(v)}}}}});
+}
+
+/* ══ MODO AÑO ══ */
+function renderAnio(anio){
+  document.getElementById('titPanel').textContent='P&L '+anio+' — '+({all:'consolidado 3P + 1P','3p':'solo 3P','1p':'solo 1P'}[SCOPE])+' (sin IVA)';
+  const ms=unionMeses(anio);
+  const packs=ms.map(m=>monthPack(R3,P1,G,m,SCOPE));
+  const S=k=>packs.reduce((a,p)=>a+p[k],0);
+  const mbp=S('ing')?S('mb')/S('ing')*100:0;
+  document.getElementById('kpisMain').innerHTML=
+    kpi('c-sky','Ingresos '+anio,fmt(S('ing')),'')+
+    (SCOPE==='all'?kpi('c-ind','Venta 3P',fmt(S('v3')),S('ing')?(S('v3')/S('ing')*100).toFixed(0)+'%':'')+kpi('c-vio','Sell In 1P',fmt(S('v1')),S('ing')?(S('v1')/S('ing')*100).toFixed(0)+'%':''):'')+
+    kpi('c-eme','Margen bruto',fmt(S('mb')),mbp.toFixed(1)+'%')+
+    (S('gastos')?kpi('c-amb','Gastos op.',fmt(S('gastos')),'')+kpi('c-ros','Utilidad',fmt(S('uti')),''):'');
+  document.getElementById('titTabla').textContent='P&L mensual '+anio;
+  document.getElementById('subTabla').textContent='';
+  const lineas=SCOPE==='all'
+    ?[['Ingresos','ing','tot'],['· Venta 3P','v3','sub'],['· Sell In 1P','v1','sub'],['MB 3P','mb3',''],['MB 1P','mb1',''],['MARGEN BRUTO','mb','tot']]
+    :SCOPE==='3p'
+    ?[['Venta','v3','tot'],['Comisiones','com',''],['Envío','env',''],['COGS','cogs3',''],['MARGEN BRUTO','mb3','tot']]
+    :[['Sell In','v1','tot'],['Rebate fijo','rfijo',''],['Rebate variable','rvar',''],['Logístico','log',''],['COGS','cogs1',''],['MARGEN BRUTO','mb1','tot'],['Sell Out (info)','sellout','sub']];
+  if(S('gastos'))lineas.push(['Gastos op.','gastos',''],['UTILIDAD','uti','tot']);
+  let h='<table class="dt"><thead><tr><th>Línea</th>'+ms.map(m=>'<th class="n">'+mLbl(m)+'</th>').join('')+'<th class="n">Total</th></tr></thead><tbody>';
   lineas.forEach(([lbl,k,cls])=>{
-    h+='<tr class="'+(cls==='tot'?'tr-tot':'')+'"><td class="lbl">'+lbl+'</td>';
-    ms.forEach(m=>h+='<td class="n">'+fmt(R3.M[m][k]||0)+'</td>');
-    const t=S(k);h+='<td class="n">'+fmt(t)+'</td><td class="n mut">'+(S('venta')?(t/S('venta')*100).toFixed(1)+'%':'—')+'</td></tr>';
+    h+='<tr class="'+(cls==='tot'?'tr-tot':cls==='sub'?'tr-sub':'')+'"><td class="lbl">'+lbl+'</td>';
+    packs.forEach(p=>h+='<td class="n">'+fmt(p[k])+'</td>');
+    h+='<td class="n">'+fmt(S(k))+'</td></tr>';
   });
-  h+='<tr><td class="lbl">MB %</td>'+ms.map(m=>{const x=R3.M[m];return '<td class="n mut">'+(x.venta?(x.mb/x.venta*100).toFixed(1)+'%':'—')+'</td>';}).join('')+
-     '<td class="n">'+(S('venta')?(S('mb')/S('venta')*100).toFixed(1)+'%':'—')+'</td><td></td></tr>';
-  h+='<tr class="tr-sub"><td class="lbl">Órdenes / Piezas</td>'+ms.map(m=>'<td class="n">'+(R3.M[m].ordenes||0).toLocaleString()+' / '+(R3.M[m].pzas||0).toLocaleString()+'</td>').join('')+'<td colspan="2"></td></tr>';
+  const base=SCOPE==='3p'?'v3':SCOPE==='1p'?'v1':'ing';
+  const mbk=SCOPE==='3p'?'mb3':SCOPE==='1p'?'mb1':'mb';
+  h+='<tr><td class="lbl">MB %</td>'+packs.map(p=>'<td class="n mut">'+(p[base]?(p[mbk]/p[base]*100).toFixed(1)+'%':'—')+'</td>').join('')+'<td class="n">'+(S(base)?(S(mbk)/S(base)*100).toFixed(1)+'%':'—')+'</td></tr>';
   h+='</tbody></table>';
-  document.getElementById('tabla3p').innerHTML=h;
-  mkChart('chart3p',{type:'bar',data:{labels:ms.map(mLbl),datasets:[
-    {label:'MB',data:ms.map(m=>Math.round(R3.M[m].mb)),backgroundColor:'#0fb981',borderRadius:4},
-    {label:'MB %',data:ms.map(m=>{const x=R3.M[m];return x.venta?+(x.mb/x.venta*100).toFixed(1):0;}),type:'line',yAxisID:'y1',borderColor:'#f09e0b',backgroundColor:'transparent',borderWidth:2,pointRadius:3,pointBackgroundColor:'#f09e0b'}
+  document.getElementById('tablaPL').innerHTML=h;
+  // chart año
+  document.getElementById('titChart').textContent='Ingresos y MB% por mes';
+  mkChart('chartMain',{type:'bar',data:{labels:ms.map(mLbl),datasets:[
+    ...(SCOPE==='all'?[
+      {label:'Venta 3P',data:packs.map(p=>Math.round(p.v3)),backgroundColor:'#5b5ef4',stack:'a',borderRadius:3},
+      {label:'Sell In 1P',data:packs.map(p=>Math.round(p.v1)),backgroundColor:'#8b5cf6',stack:'a',borderRadius:3}]
+    :[{label:SCOPE==='3p'?'Venta 3P':'Sell In 1P',data:packs.map(p=>Math.round(p[base])),backgroundColor:'#5b5ef4',borderRadius:3}]),
+    {label:'MB %',data:packs.map(p=>p[base]?+(p[mbk]/p[base]*100).toFixed(1):0),type:'line',yAxisID:'y1',borderColor:'#f09e0b',backgroundColor:'transparent',borderWidth:2,pointRadius:3,pointBackgroundColor:'#f09e0b'}
   ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:'#8892a4',font:{size:10},padding:10}},
-    tooltip:{callbacks:{label:c=>c.dataset.label==='MB %'?' '+c.parsed.y+'%':' '+fmt(c.parsed.y)}}},
-    scales:{x:{...AX},y:{...AX,ticks:{...AX.ticks,callback:v=>fmt(v)}},y1:{position:'right',ticks:{color:'#f09e0b',font:{size:10},callback:v=>v+'%'},grid:{display:false}}}}});
-  let he='<table class="dt"><thead><tr><th>Razón social</th>'+ms.map(m=>'<th class="n">'+mLbl(m)+'</th>').join('')+'<th class="n">Total</th></tr></thead><tbody>';
-  ['Archibrand','Codevaran'].forEach(ent=>{
-    let tot=0;
-    he+='<tr><td class="lbl" style="color:'+(ent==='Archibrand'?'var(--indigo)':'var(--rose)')+';font-weight:600;">'+ent+'</td>';
-    ms.forEach(m=>{const v=(R3.E[m]||{})[ent]||0;tot+=v;he+='<td class="n">'+fmt(v)+'</td>';});
-    he+='<td class="n">'+fmt(tot)+'</td></tr>';
-  });
-  he+='</tbody></table>';
-  document.getElementById('tablaEnt').innerHTML=he;
+    tooltip:{callbacks:{label:c=>c.dataset.label==='MB %'?' MB '+c.parsed.y+'%':' '+c.dataset.label+': '+fmt(c.parsed.y)}}},
+    scales:{x:{...AX,stacked:SCOPE==='all'},y:{...AX,stacked:SCOPE==='all',ticks:{...AX.ticks,callback:v=>fmt(v)}},
+    y1:{position:'right',ticks:{color:'#f09e0b',font:{size:10},callback:v=>v+'%'},grid:{display:false}}}}});
+  // tabla 3P detallada + entidades
+  if(SCOPE!=='1p'){
+    document.getElementById('sub3p').textContent=document.getElementById('fBase').value||'ambas razones sociales';
+    const m3s=meses(R3.M,anio);
+    const S3=k=>m3s.reduce((a,m)=>a+(R3.M[m][k]||0),0);
+    let h3='<table class="dt"><thead><tr><th>Línea</th>'+m3s.map(m=>'<th class="n">'+mLbl(m)+'</th>').join('')+'<th class="n">Total</th><th class="n">% Venta</th></tr></thead><tbody>';
+    [['Venta','venta',''],['Comisiones','com',''],['Envío','env',''],['COGS','cogs',''],['MARGEN BRUTO','mb','tot']].forEach(([lbl,k,cls])=>{
+      h3+='<tr class="'+(cls==='tot'?'tr-tot':'')+'"><td class="lbl">'+lbl+'</td>';
+      m3s.forEach(m=>h3+='<td class="n">'+fmt(R3.M[m][k]||0)+'</td>');
+      h3+='<td class="n">'+fmt(S3(k))+'</td><td class="n mut">'+(S3('venta')?(S3(k)/S3('venta')*100).toFixed(1)+'%':'—')+'</td></tr>';
+    });
+    h3+='<tr class="tr-sub"><td class="lbl">Razón social</td>'+m3s.map(m=>{
+      const e=R3.E[m]||{};return '<td class="n">'+fmt(e['Archibrand']||0)+' / '+fmt(e['Codevaran']||0)+'</td>';
+    }).join('')+'<td colspan="2" class="mut">Archibrand / Codevaran</td></tr>';
+    h3+='</tbody></table>';
+    document.getElementById('tabla3p').innerHTML=h3;
+  }
 }
 
-function renderCanales(anio){
-  const ms=meses(R3.M,anio);
-  const byC={};
-  Object.values(R3.C).forEach(c=>{if(!c.mes.startsWith(anio))return;
-    const o=byC[c.channel]=byC[c.channel]||{venta:0,per:{}};
-    o.venta+=c.venta;o.per[c.mes]=c;});
-  const canales=Object.entries(byC).sort((a,b)=>b[1].venta-a[1].venta);
-  let h='<table class="dt"><thead><tr><th>Canal</th>'+ms.map(m=>'<th class="n">'+mLbl(m)+'</th>').join('')+'<th class="n">Total</th><th class="n">MB% año</th></tr></thead><tbody>';
-  canales.forEach(([ch,o])=>{
-    let mbT=0;
-    h+='<tr><td class="lbl">'+ch+'</td>';
-    ms.forEach(m=>{
-      const c=o.per[m];
-      if(!c){h+='<td class="n mut">—</td>';return;}
-      const mb=c.venta-c.com-c.env-c.cogs;mbT+=mb;
+/* ══ CANALES ══ */
+function renderCanales(anio,mes){
+  if(SCOPE==='1p')return;
+  if(MODO==='mes'){
+    document.getElementById('noteCanales').textContent='Detalle del mes seleccionado · Δ venta vs mes anterior.';
+    const pm=prevMes(mes);
+    const cur={},prev={};
+    Object.values(R3.C).forEach(c=>{if(c.mes===mes)cur[c.channel]=c;if(c.mes===pm)prev[c.channel]=c;});
+    const canales=Object.entries(cur).sort((a,b)=>b[1].venta-a[1].venta);
+    let h='<table class="dt"><thead><tr><th>Canal</th><th class="n">Venta</th><th class="n">Comisión</th><th class="n">Envío</th><th class="n">COGS</th><th class="n">MB</th><th class="n">MB%</th><th class="n">Δ venta</th></tr></thead><tbody>';
+    let tv=0,tm=0;
+    canales.forEach(([ch,c])=>{
+      const mb=c.venta-c.com-c.env-c.cogs;tv+=c.venta;tm+=mb;
       const p=c.venta?mb/c.venta*100:0;
-      h+='<td class="n">'+fmt(c.venta)+' <span class="'+(p<0?'negv':p<20?'mut':'pos')+'" style="font-size:9.5px;">'+p.toFixed(0)+'%</span></td>';
+      h+=`<tr><td class="lbl">${ch}</td><td class="n">${fmt(c.venta)}</td><td class="n">${fmt(c.com)}</td><td class="n">${fmt(c.env)}</td><td class="n">${fmt(c.cogs)}</td><td class="n">${fmt(mb)}</td><td class="n ${p<0?'negv':p<20?'mut':'pos'}">${p.toFixed(1)}%</td><td class="n">${dHtml(dPct(c.venta,prev[ch]?prev[ch].venta:null))}</td></tr>`;
     });
-    const pT=o.venta?mbT/o.venta*100:0;
-    h+='<td class="n">'+fmt(o.venta)+'</td><td class="n '+(pT<0?'negv':pT<20?'mut':'pos')+'">'+pT.toFixed(1)+'%</td></tr>';
-  });
-  h+='</tbody></table>';
-  document.getElementById('tablaCanales').innerHTML=h;
+    h+=`<tr class="tr-tot"><td>Total</td><td class="n">${fmt(tv)}</td><td colspan="3"></td><td class="n">${fmt(tm)}</td><td class="n">${tv?(tm/tv*100).toFixed(1)+'%':'—'}</td><td></td></tr>`;
+    h+='</tbody></table>';
+    document.getElementById('tablaCanales').innerHTML=h;
+  }else{
+    document.getElementById('noteCanales').textContent='Cada celda: venta sin IVA · MB% del canal en el mes.';
+    const ms=meses(R3.M,anio);
+    const byC={};
+    Object.values(R3.C).forEach(c=>{if(!c.mes.startsWith(anio))return;
+      const o=byC[c.channel]=byC[c.channel]||{venta:0,per:{}};o.venta+=c.venta;o.per[c.mes]=c;});
+    const canales=Object.entries(byC).sort((a,b)=>b[1].venta-a[1].venta);
+    let h='<table class="dt"><thead><tr><th>Canal</th>'+ms.map(m=>'<th class="n">'+mLbl(m)+'</th>').join('')+'<th class="n">Total</th><th class="n">MB% año</th></tr></thead><tbody>';
+    canales.forEach(([ch,o])=>{
+      let mbT=0;
+      h+='<tr><td class="lbl">'+ch+'</td>';
+      ms.forEach(m=>{
+        const c=o.per[m];
+        if(!c){h+='<td class="n mut">—</td>';return;}
+        const mb=c.venta-c.com-c.env-c.cogs;mbT+=mb;
+        const p=c.venta?mb/c.venta*100:0;
+        h+='<td class="n">'+fmt(c.venta)+' <span class="'+(p<0?'negv':p<20?'mut':'pos')+'" style="font-size:9.5px;">'+p.toFixed(0)+'%</span></td>';
+      });
+      const pT=o.venta?mbT/o.venta*100:0;
+      h+='<td class="n">'+fmt(o.venta)+'</td><td class="n '+(pT<0?'negv':pT<20?'mut':'pos')+'">'+pT.toFixed(1)+'%</td></tr>';
+    });
+    h+='</tbody></table>';
+    document.getElementById('tablaCanales').innerHTML=h;
+  }
 }
 
-function render1P(anio){
-  const wrap=document.getElementById('bloques1p');wrap.innerHTML='';
-  [['Mercado Libre','var(--indigo)'],['Amazon','var(--amber)']].forEach(([ret,color])=>{
-    const D=P1[ret];const ms=meses(D,anio);
-    const reb=R[ret]||{fijo:0,log:0,vari:{}};
-    const S=k=>ms.reduce((a,m)=>a+(D[m][k]||0),0);
-    const lineas=[['Sell In','sellin',''],['Rebate fijo ('+(reb.fijo*100).toFixed(2)+'%)','rfijo',''],
-      ['Rebate variable','rvar',''],['Logístico ('+(reb.log*100).toFixed(1)+'%)','log',''],
-      ['COGS (landed)','cogs',''],['MARGEN BRUTO','mb','tot']];
-    let h='<div class="card"><div class="card-hd"><div class="card-title" style="color:'+color+'">'+ret+'</div><div class="card-sub">Sell In sin IVA · rebates editables en REBATES_1P</div></div><div class="tw"><table class="dt"><thead><tr><th>Línea</th>'+ms.map(m=>'<th class="n">'+mLbl(m)+'</th>').join('')+'<th class="n">Total</th></tr></thead><tbody>';
-    lineas.forEach(([lbl,k,cls])=>{
-      h+='<tr class="'+(cls==='tot'?'tr-tot':'')+'"><td class="lbl">'+lbl+'</td>';
-      ms.forEach(m=>h+='<td class="n">'+fmt(D[m][k]||0)+'</td>');
-      h+='<td class="n">'+fmt(S(k))+'</td></tr>';
+/* ══ 1P ══ */
+function render1P(anio,mes){
+  if(SCOPE==='3p')return;
+  const wrap=document.getElementById('bloques1p');
+  if(MODO==='mes'){
+    const pm=prevMes(mes);
+    let h='<div class="card"><div class="tw"><table class="dt"><thead><tr><th>Retailer</th><th class="n">Sell In</th><th class="n">Rebate fijo</th><th class="n">Rebate var</th><th class="n">Logístico</th><th class="n">COGS</th><th class="n">MB</th><th class="n">MB%</th><th class="n">Δ Sell In</th><th class="n">Sell Out</th><th class="n">Cobertura</th></tr></thead><tbody>';
+    let ts=0,tm=0;
+    [['Mercado Libre','var(--indigo)'],['Amazon','var(--amber)']].forEach(([ret,color])=>{
+      const d=P1[ret][mes]||Z1, dp=P1[ret][pm];
+      ts+=d.sellin;tm+=d.mb;
+      const p=d.sellin?d.mb/d.sellin*100:0;
+      h+=`<tr><td class="lbl" style="color:${color};font-weight:600;">${ret}</td><td class="n">${fmt(d.sellin)}</td><td class="n">${fmt(d.rfijo)}</td><td class="n">${fmt(d.rvar)}</td><td class="n">${fmt(d.log)}</td><td class="n">${fmt(d.cogs)}</td><td class="n" style="font-weight:700;">${fmt(d.mb)}</td><td class="n ${p<0?'negv':p<20?'mut':'pos'}">${d.sellin?p.toFixed(1)+'%':'—'}</td><td class="n">${dHtml(dPct(d.sellin,dp?dp.sellin:null))}</td><td class="n mut">${fmt(d.sellout)}</td><td class="n mut">${d.sellin?(d.sellout/d.sellin*100).toFixed(0)+'%':'—'}</td></tr>`;
     });
-    h+='<tr><td class="lbl">MB %</td>'+ms.map(m=>{const x=D[m];return '<td class="n mut">'+(x.sellin?(x.mb/x.sellin*100).toFixed(1)+'%':'—')+'</td>';}).join('')+'<td class="n">'+(S('sellin')?(S('mb')/S('sellin')*100).toFixed(1)+'%':'—')+'</td></tr>';
-    h+='<tr class="tr-sub"><td class="lbl">Sell Out sin IVA (info)</td>'+ms.map(m=>'<td class="n">'+fmt(D[m].sellout||0)+'</td>').join('')+'<td class="n">'+fmt(S('sellout'))+'</td></tr>';
-    h+='<tr class="tr-sub"><td class="lbl">Cobertura SO/SI</td>'+ms.map(m=>{const x=D[m];return '<td class="n">'+(x.sellin?(x.sellout/x.sellin*100).toFixed(0)+'%':'—')+'</td>';}).join('')+'<td class="n">'+(S('sellin')?(S('sellout')/S('sellin')*100).toFixed(0)+'%':'—')+'</td></tr>';
-    h+='</tbody></table></div></div>';
-    wrap.innerHTML+=h;
-  });
+    h+=`<tr class="tr-tot"><td>Total 1P</td><td class="n">${fmt(ts)}</td><td colspan="4"></td><td class="n">${fmt(tm)}</td><td class="n">${ts?(tm/ts*100).toFixed(1)+'%':'—'}</td><td colspan="3"></td></tr>`;
+    h+='</tbody></table></div><div class="note">Rebate variable: pestaña REBATES_1P, fila REBATE_VARIABLE con MES='+mes+'. Cobertura = Sell Out sin IVA ÷ Sell In del mes.</div></div>';
+    wrap.innerHTML=h;
+  }else{
+    wrap.innerHTML='';let html='<div class="g2">';
+    [['Mercado Libre','var(--indigo)'],['Amazon','var(--amber)']].forEach(([ret,color])=>{
+      const D=P1[ret];const ms=meses(D,anio);const reb=R[ret]||{fijo:0,log:0,vari:{}};
+      const S=k=>ms.reduce((a,m)=>a+(D[m][k]||0),0);
+      const lineas=[['Sell In','sellin',''],['Rebate fijo ('+(reb.fijo*100).toFixed(2)+'%)','rfijo',''],['Rebate variable','rvar',''],
+        ['Logístico ('+(reb.log*100).toFixed(1)+'%)','log',''],['COGS','cogs',''],['MARGEN BRUTO','mb','tot']];
+      let h='<div class="card"><div class="card-hd"><div class="card-title" style="color:'+color+'">'+ret+'</div></div><div class="tw"><table class="dt"><thead><tr><th>Línea</th>'+ms.map(m=>'<th class="n">'+mLbl(m)+'</th>').join('')+'<th class="n">Total</th></tr></thead><tbody>';
+      lineas.forEach(([lbl,k,cls])=>{
+        h+='<tr class="'+(cls==='tot'?'tr-tot':'')+'"><td class="lbl">'+lbl+'</td>';
+        ms.forEach(m=>h+='<td class="n">'+fmt(D[m][k]||0)+'</td>');
+        h+='<td class="n">'+fmt(S(k))+'</td></tr>';
+      });
+      h+='<tr><td class="lbl">MB %</td>'+ms.map(m=>{const x=D[m];return '<td class="n mut">'+(x.sellin?(x.mb/x.sellin*100).toFixed(1)+'%':'—')+'</td>';}).join('')+'<td class="n">'+(S('sellin')?(S('mb')/S('sellin')*100).toFixed(1)+'%':'—')+'</td></tr>';
+      h+='<tr class="tr-sub"><td class="lbl">Sell Out (info)</td>'+ms.map(m=>'<td class="n">'+fmt(D[m].sellout||0)+'</td>').join('')+'<td class="n">'+fmt(S('sellout'))+'</td></tr>';
+      h+='<tr class="tr-sub"><td class="lbl">Cobertura SO/SI</td>'+ms.map(m=>{const x=D[m];return '<td class="n">'+(x.sellin?(x.sellout/x.sellin*100).toFixed(0)+'%':'—')+'</td>';}).join('')+'<td class="n">'+(S('sellin')?(S('sellout')/S('sellin')*100).toFixed(0)+'%':'—')+'</td></tr>';
+      h+='</tbody></table></div></div>';
+      html+=h;
+    });
+    wrap.innerHTML=html+'</div>';
+  }
 }
 
-function renderAlertas(anio){
-  const ms=meses(R3.M,anio);
-  const last=ms[ms.length-1];
+/* ══ ALERTAS ══ */
+function renderAlertas(anio,mes){
+  const enMes=MODO==='mes';
   const missions=[];
-  // UPCs sin landed
-  const slMs=Object.keys(R3.SL).filter(m=>m.startsWith(anio));
-  const slP=slMs.reduce((a,m)=>a+R3.SL[m].pzas,0);
-  const slU=new Set();slMs.forEach(m=>Object.keys(R3.SL[m].upcs).forEach(u=>slU.add(u)));
-  const siNL=(P1['Mercado Libre'][last]?.siNoLanded||0)+(P1['Amazon'][last]?.siNoLanded||0);
-  if(slU.size||siNL)missions.push({t:'',b:'w',badge:'LANDED',title:(slU.size+ (siNL?1:0))+' UPCs sin costo',desc:slP+' pzas 3P sin landed en '+anio+(siNL?' · '+siNL+' pzas 1P en '+mLbl(last):'')+'. Captúralos en la pestaña LANDED.'});
-  else missions.push({t:'ok',b:'o',badge:'LANDED ✓',title:'Cobertura de costos completa',desc:'Todos los UPCs vendidos tienen landed.'});
-  // canceladas mes actual
-  const cz=CANC[last];
-  if(cz&&cz.ordenes)missions.push({t:'',b:'w',badge:'INFO',title:cz.ordenes+' canceladas en '+mLbl(last),desc:fmt(cz.valor)+' sin IVA. Excluidas del P&L.'});
-  // margen negativo
-  const negs=Object.values(R3.skuAgg).filter(s=>s.venta>1000&&s.mb<0);
-  if(negs.length)missions.push({t:'al',b:'a',badge:'MARGEN',title:negs.length+' SKUs venden con pérdida',desc:'MB acumulado '+fmt(negs.reduce((a,s)=>a+s.mb,0))+'. Revisa la tabla de abajo.'});
-  // cobertura SO/SI
-  ['Mercado Libre','Amazon'].forEach(ret=>{
-    const D=P1[ret];const msr=meses(D,anio);
-    const si=msr.reduce((a,m)=>a+D[m].sellin,0),so=msr.reduce((a,m)=>a+D[m].sellout,0);
-    if(si>0){const cob=so/si*100;
-      missions.push({t:cob<60?'':'ok',b:cob<60?'w':'o',badge:'1P '+(ret==='Amazon'?'AMZ':'ML'),
-        title:'Retailer ha desplazado '+cob.toFixed(0)+'% del sell-in',
-        desc:'Sell In '+fmt(si)+' vs Sell Out '+fmt(so)+' acumulado '+anio+'. '+(cob<60?'Inventario acumulándose en el retailer.':'Rotación sana.')});}
-  });
+  const slKeys=enMes?(R3.SL[mes]?[mes]:[]):Object.keys(R3.SL).filter(m=>m.startsWith(anio));
+  const slP=slKeys.reduce((a,m)=>a+R3.SL[m].pzas,0);
+  const slU=new Set();slKeys.forEach(m=>Object.keys(R3.SL[m].upcs).forEach(u=>slU.add(u)));
+  const per=enMes?mFull(mes):anio;
+  if(SCOPE!=='1p'){
+    if(slU.size)missions.push({t:'',b:'w',badge:'LANDED',title:slU.size+' UPCs 3P sin costo',desc:slP+' pzas en '+per+'. Captúralos en la pestaña LANDED y actualiza.'});
+    else missions.push({t:'ok',b:'o',badge:'LANDED ✓',title:'Cobertura de costos 3P completa',desc:'Todos los UPCs 3P de '+per+' tienen landed.'});
+    const cz=CANC[enMes?mes:Object.keys(CANC).filter(m=>m.startsWith(anio)).sort().pop()];
+    if(cz&&cz.ordenes)missions.push({t:'',b:'w',badge:'INFO',title:cz.ordenes+' canceladas'+(enMes?' en '+mLbl(mes):' (último mes)'),desc:fmt(cz.valor)+' sin IVA. Excluidas del P&L.'});
+    const negs=Object.values(R3.skuMes).filter(s=>(enMes?s.mes===mes:s.mes.startsWith(anio)));
+    const agg={};negs.forEach(s=>{const a=agg[s.sku]=agg[s.sku]||{sku:s.sku,name:s.name,venta:0,mb:0};a.venta+=s.venta;a.mb+=s.mb;if(s.name&&!a.name)a.name=s.name;});
+    const bad=Object.values(agg).filter(s=>s.venta>1000&&s.mb<0);
+    if(bad.length)missions.push({t:'al',b:'a',badge:'MARGEN',title:bad.length+' SKUs con pérdida en '+per,desc:'MB '+fmt(bad.reduce((a,s)=>a+s.mb,0))+'. Ver tabla.'});
+    window.__negs=bad;
+  }else window.__negs=[];
+  if(SCOPE!=='3p'){
+    ['Mercado Libre','Amazon'].forEach(ret=>{
+      const D=P1[ret];const msr=meses(D,anio);
+      const si=msr.reduce((a,m)=>a+D[m].sellin,0),so=msr.reduce((a,m)=>a+D[m].sellout,0);
+      if(si>0){const cob=so/si*100;
+        missions.push({t:cob<60?'':'ok',b:cob<60?'w':'o',badge:'1P '+(ret==='Amazon'?'AMZ':'ML'),
+          title:'Desplazado '+cob.toFixed(0)+'% del sell-in '+anio,
+          desc:'Sell In '+fmt(si)+' vs Sell Out '+fmt(so)+'. '+(cob<60?'Inventario acumulándose en el retailer.':'Rotación sana.')});}
+      const d=D[enMes?mes:null];
+      if(enMes&&d&&d.siNoLanded)missions.push({t:'',b:'w',badge:'LANDED 1P',title:d.siNoLanded+' pzas sell-in sin landed',desc:ret+' · '+mFull(mes)+'. COGS subestimado.'});
+    });
+  }
   document.getElementById('missionsGrid').innerHTML=missions.map(m=>`<div class="mc ${m.t}"><span class="mc-badge ${m.b}">${m.badge}</span><div class="mc-title">${m.title}</div><div class="mc-desc">${m.desc}</div></div>`).join('');
   // tabla sin landed
   let h='<table class="dt"><thead><tr><th>Mes</th><th class="n">Piezas</th><th class="n">Venta s/IVA</th><th>UPCs</th></tr></thead><tbody>';
-  if(!slMs.length)h+='<tr><td colspan="4" class="mut">Sin pendientes — todos los UPCs de '+anio+' tienen landed.</td></tr>';
-  slMs.forEach(m=>{const s=R3.SL[m];
+  if(!slKeys.length)h+='<tr><td colspan="4" class="mut">Sin pendientes en '+per+'.</td></tr>';
+  slKeys.forEach(m=>{const s=R3.SL[m];
     h+='<tr><td>'+mLbl(m)+'</td><td class="n">'+s.pzas.toLocaleString()+'</td><td class="n">'+fmt(s.venta)+'</td><td style="font-size:10px;color:var(--text3);max-width:340px;white-space:normal;">'+Object.keys(s.upcs).join(', ')+'</td></tr>';});
   h+='</tbody></table>';
   document.getElementById('tablaSinLanded').innerHTML=h;
-  // tabla negativos
-  const negSorted=negs.sort((a,b)=>a.mb-b.mb).slice(0,15);
+  // negativos
+  document.getElementById('subNeg').textContent=per+' · venta > $1,000 · comisión y envío prorrateados';
+  const bad=(window.__negs||[]).sort((a,b)=>a.mb-b.mb).slice(0,15);
   let hn='<table class="dt"><thead><tr><th>UPC</th><th>Producto</th><th class="n">Venta</th><th class="n">MB</th><th class="n">MB%</th></tr></thead><tbody>';
-  if(!negSorted.length)hn+='<tr><td colspan="5" class="mut">Ningún SKU con margen negativo en '+anio+'.</td></tr>';
-  negSorted.forEach(s=>{hn+='<tr><td style="font-size:10px;color:var(--text3);">'+s.sku+'</td><td style="max-width:260px;white-space:normal;font-size:11px;">'+(s.name||'')+'</td><td class="n">'+fmt(s.venta)+'</td><td class="n negv">'+fmt(s.mb)+'</td><td class="n negv">'+(s.venta?(s.mb/s.venta*100).toFixed(0)+'%':'—')+'</td></tr>';});
+  if(!bad.length)hn+='<tr><td colspan="5" class="mut">Ningún SKU con margen negativo en '+per+'.</td></tr>';
+  bad.forEach(s=>{hn+='<tr><td style="font-size:10px;color:var(--text3);">'+s.sku+'</td><td style="max-width:260px;white-space:normal;font-size:11px;">'+(s.name||'')+'</td><td class="n">'+fmt(s.venta)+'</td><td class="n negv">'+fmt(s.mb)+'</td><td class="n negv">'+(s.venta?(s.mb/s.venta*100).toFixed(0)+'%':'—')+'</td></tr>';});
   hn+='</tbody></table>';
   document.getElementById('tablaNeg').innerHTML=hn;
 }
@@ -625,18 +780,15 @@ function renderTasas(){
   });
   hr+='</tbody></table>';
   const gm=Object.keys(G).sort();
-  if(gm.length){
-    hr+='<div class="note" style="margin-top:10px;"><b>Gastos operativos:</b> '+gm.map(m=>mLbl(m)+': '+fmt(G[m].total)).join(' · ')+'</div>';
-  }else{
-    hr+='<div class="note" style="margin-top:10px;">GASTOS_OP sin montos — el P&L termina en Margen bruto. Captura conceptos con VALOR &gt; 0 para activar la línea de Utilidad.</div>';
-  }
+  if(gm.length)hr+='<div class="note" style="margin-top:10px;"><b>Gastos operativos:</b> '+gm.map(m=>mLbl(m)+': '+fmt(G[m].total)).join(' · ')+'</div>';
+  else hr+='<div class="note" style="margin-top:10px;">GASTOS_OP sin montos — el P&L termina en Margen bruto. Captura VALOR &gt; 0 para activar Utilidad.</div>';
   document.getElementById('tablaRebates').innerHTML=hr;
 }
 
 function renderDatos(){
-  let h='<table class="dt"><thead><tr><th>Pestaña</th><th>Estado</th><th class="n">Filas</th></tr></thead><tbody>';
+  let h='<table class="dt"><thead><tr><th>Pestaña</th><th>Estado</th><th class="n">Filas</th><th class="n">Último dato</th></tr></thead><tbody>';
   health.forEach(x=>{
-    h+='<tr><td class="lbl">'+x.tab+'</td><td class="'+(x.ok?'pos':'negv')+'">'+(x.ok?'OK':'Error: '+x.err)+'</td><td class="n">'+x.filas.toLocaleString()+'</td></tr>';
+    h+='<tr><td class="lbl">'+x.tab+'</td><td class="'+(x.ok?'pos':'negv')+'">'+(x.ok?'OK':'Error: '+x.err)+'</td><td class="n">'+x.filas.toLocaleString()+'</td><td class="n">'+(x.last||'—')+'</td></tr>';
   });
   h+='</tbody></table>';
   document.getElementById('tablaDatos').innerHTML=h;
@@ -648,9 +800,9 @@ function navGo(id,el){
   el.classList.add('on');
 }
 window.addEventListener('scroll',()=>{
-  const ids=['s-resumen','s-3p','s-canales','s-1p','s-alertas','s-tasas','s-datos'];
+  const ids=['s-panel','s-canales','s-1p','s-alertas','s-tasas','s-datos'];
   const pills=document.querySelectorAll('.nav-pill');let cur=0;
-  ids.forEach((id,i)=>{const el=document.getElementById(id);if(el&&el.getBoundingClientRect().top<=140)cur=i;});
+  ids.forEach((id,i)=>{const el=document.getElementById(id);if(el&&el.style.display!=='none'&&el.getBoundingClientRect().top<=140)cur=i;});
   pills.forEach((p,i)=>p.classList.toggle('on',i===cur));
 },{passive:true});
 
