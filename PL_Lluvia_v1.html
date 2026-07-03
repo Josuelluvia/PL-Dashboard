@@ -192,6 +192,7 @@ table.dt .lbl{color:var(--text2);}
 const CFG = Object.freeze({
   SHEET_ARCH : '11RVQAPpuZpPxZXtH1Zg1Qozy84bzj7SJ1pykoM1xoYo',
   SHEET_CODE : '1cE8U9eMLdJRQnDgez8GlwgJw1iDIKcnBE8M3IDFYYGc',
+  SHEET_PL   : '1lx4ZoaXe-Ro2CvEvrSBaIwjnDlfmqZc88tR8U41oty8',
   API_KEY    : 'AIzaSyCZ4ZNLCCPzwakC2uMdT1PIW_kwn6J3bcU',
   TABS_ARCH  : { ventas:'archibrand', si_ml:'1P_SI_ML', si_amz:'1P_SI_AMZ', so_ml:'1P_SO_ML', so_amz:'1P_SO_AMZ',
                  landed:'LANDED', tasas:'TASAS', rebates:'REBATES_1P', gastos:'GASTOS_OP' },
@@ -372,14 +373,14 @@ async function loadData(){
   const jobs=[
     ['ventas ARC',()=>fetchTab(CFG.SHEET_ARCH,CFG.TABS_ARCH.ventas),'ventasA',true],
     ['ventas CDV',()=>fetchTab(CFG.SHEET_CODE,CFG.TAB_CODE),'ventasC',true],
-    ['1P_SI_ML',()=>fetchTab(CFG.SHEET_ARCH,CFG.TABS_ARCH.si_ml),'si_ml',true],
-    ['1P_SI_AMZ',()=>fetchTab(CFG.SHEET_ARCH,CFG.TABS_ARCH.si_amz),'si_amz',true],
-    ['1P_SO_ML',()=>fetchTab(CFG.SHEET_ARCH,CFG.TABS_ARCH.so_ml),'so_ml',true],
-    ['1P_SO_AMZ',()=>fetchTab(CFG.SHEET_ARCH,CFG.TABS_ARCH.so_amz),'so_amz',true],
-    ['LANDED',()=>fetchTab(CFG.SHEET_ARCH,CFG.TABS_ARCH.landed),'landed',true],
-    ['TASAS',()=>fetchTab(CFG.SHEET_ARCH,CFG.TABS_ARCH.tasas),'tasas',true],
-    ['REBATES_1P',()=>fetchTab(CFG.SHEET_ARCH,CFG.TABS_ARCH.rebates),'rebates',true],
-    ['GASTOS_OP',()=>fetchTab(CFG.SHEET_ARCH,CFG.TABS_ARCH.gastos),'gastos',false],
+    ['1P_SI_ML',()=>fetchTab(CFG.SHEET_PL,CFG.TABS_ARCH.si_ml),'si_ml',true],
+    ['1P_SI_AMZ',()=>fetchTab(CFG.SHEET_PL,CFG.TABS_ARCH.si_amz),'si_amz',true],
+    ['1P_SO_ML',()=>fetchTab(CFG.SHEET_PL,CFG.TABS_ARCH.so_ml),'so_ml',true],
+    ['1P_SO_AMZ',()=>fetchTab(CFG.SHEET_PL,CFG.TABS_ARCH.so_amz),'so_amz',true],
+    ['LANDED',()=>fetchTab(CFG.SHEET_PL,CFG.TABS_ARCH.landed),'landed',true],
+    ['TASAS',()=>fetchTab(CFG.SHEET_PL,CFG.TABS_ARCH.tasas),'tasas',true],
+    ['REBATES_1P',()=>fetchTab(CFG.SHEET_PL,CFG.TABS_ARCH.rebates),'rebates',true],
+    ['GASTOS_OP',()=>fetchTab(CFG.SHEET_PL,CFG.TABS_ARCH.gastos),'gastos',false],
   ];
   const results=await Promise.allSettled(jobs.map(j=>j[1]()));
   let fatal=[];
